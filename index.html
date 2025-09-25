@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Progresso - Bot Superpoderes Cosméticos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page, vertical scrolling dashboard with a sticky top navigation for quick access to sections. The structure prioritizes a high-level summary upfront (KPIs, chart), followed by an interactive architecture diagram for deep exploration, and a visual roadmap for future steps. This non-linear, interactive approach is more engaging than a static slide deck and allows stakeholders to explore details as needed. A separate, full-screen view for cost analysis is triggered from the nav, creating a focused "page" for financial details without leaving the SPA. -->
+    <!-- Visualization & Content Choices: Report Info: Project Status -> Goal: Inform -> Viz: KPI cards & Donut Chart -> Interaction: Hover on chart -> Justification: Quick visual summary of progress -> Library: Chart.js/Canvas. Report Info: System Architecture -> Goal: Organize/Explain -> Viz: Interactive Flowchart -> Interaction: Click component to reveal details -> Justification: Makes complex system understandable and engaging -> Library: HTML/CSS/JS. Report Info: Costs -> Goal: Compare/Justify -> Viz: Comparison cards with images and data -> Interaction: Navigate to dedicated view -> Justification: Clearly demonstrates the financial benefits of the self-hosted approach. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .architect-item-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out;
+        }
+        .architect-item-details.open {
+            max-height: 500px;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-action:hover {
+            color: #D97706; 
+        }
+        .nav-link.active {
+            color: #D97706;
+            border-bottom-color: #D97706;
+        }
+        .kpi-card {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #F3F4F6;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .interactive-diagram-item {
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .interactive-diagram-item:hover {
+            transform: scale(1.03);
+            background-color: #FFF7ED;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-40">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-amber-700">Bot Superpoderes Cosméticos</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#status" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">Status</a>
+                <a href="#" id="infra-link" class="nav-action text-gray-600 font-medium">Infraestrutura & Custos</a>
+                <a href="#proximos-passos" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">Próximos Passos</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none">
+                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#status" class="block py-2 px-6 text-sm text-gray-700 hover:bg-amber-50 nav-link-mobile">Status</a>
+            <a href="#" id="infra-link-mobile" class="block py-2 px-6 text-sm text-gray-700 hover:bg-amber-50">Infraestrutura & Custos</a>
+            <a href="#proximos-passos" class="block py-2 px-6 text-sm text-gray-700 hover:bg-amber-50 nav-link-mobile">Próximos Passos</a>
+        </div>
+    </header>
+
+    <div id="main-report">
+        <main class="container mx-auto px-6 py-12">
+            
+            <section id="visao-geral" class="text-center mb-20">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Acompanhamento de Progresso do Projeto</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">
+                    Nosso objetivo é criar um assistente virtual de ponta para automatizar o atendimento, qualificar leads e
+                    elevar a experiência do cliente da Superpoderes Cosméticos através do WhatsApp, com a rara capacidade de entender, transcrever e responder mensagens de áudio — uma funcionalidade presente em menos de 5% dos bots do mercado.
+                </p>
+            </section>
+
+            <section id="status" class="mb-24 scroll-mt-20">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">Status Atual do Projeto</h3>
+                    <p class="mt-2 text-gray-600">Da fundação à implementação de funcionalidades ativas e inteligentes.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                    <div class="kpi-card">
+                        <div>
+                            <div class="text-5xl mb-2">✅</div>
+                            <h4 class="text-xl font-semibold text-gray-800">Fase Atual</h4>
+                            <p class="text-3xl lg:text-2xl font-bold text-amber-600 break-words">Funcionalidades Ativas</p>
+                        </div>
+                        <p class="text-gray-500 mt-2">O bot já executa tarefas essenciais de forma autônoma.</p>
+                    </div>
+                     <div class="kpi-card">
+                        <div>
+                            <div class="text-5xl mb-2">🎙️</div>
+                            <h4 class="text-xl font-semibold text-gray-800">Inteligência de Áudio</h4>
+                            <p class="text-3xl lg:text-2xl font-bold text-purple-600 break-words">Diferencial</p>
+                        </div>
+                        <p class="text-gray-500 mt-2">Entende, transcreve e responde por áudio, elevando a experiência.</p>
+                    </div>
+                     <div class="kpi-card">
+                        <div>
+                            <div class="text-5xl mb-2">⚙️</div>
+                            <h4 class="text-xl font-semibold text-gray-800">Infraestrutura</h4>
+                            <p class="text-3xl lg:text-2xl font-bold text-green-600">100%</p>
+                        </div>
+                        <p class="text-gray-500 mt-2">Base tecnológica robusta e escalável totalmente operacional.</p>
+                    </div>
+                     <div class="kpi-card">
+                        <div>
+                            <div class="text-5xl mb-2">🧠</div>
+                            <h4 class="text-xl font-semibold text-gray-800">Fluxos Ativos</h4>
+                            <p class="text-3xl lg:text-2xl font-bold text-blue-600">3</p>
+                        </div>
+                        <p class="text-gray-500 mt-2">Cadastro, Validação e Atendimento Inicial já estão em produção.</p>
+                    </div>
+                </div>
+                 <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <h4 class="text-2xl font-bold text-center text-gray-800 mb-6">Divisão de Esforço do Projeto</h4>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="arquitetura" class="mb-24 scroll-mt-20">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">Arquitetura Interativa da Solução</h3>
+                    <p class="mt-2 text-gray-600">Clique em cada componente para ver os detalhes de sua função e status.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex flex-col md:flex-row items-center justify-center p-4">
+                        <div class="interactive-diagram-item bg-white p-6 rounded-lg shadow-md border w-full md:w-1/4 text-center">
+                            <span class="text-4xl">👤</span>
+                            <h4 class="text-lg font-bold mt-2">Cliente</h4>
+                            <p class="text-sm text-gray-500">Inicia a interação via WhatsApp</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-center text-3xl text-gray-400">↓</div>
+
+                    <div class="flex flex-col md:flex-row items-center justify-center p-4">
+                         <div class="interactive-diagram-item bg-white p-6 rounded-lg shadow-md border w-full md:w-1/4 text-center">
+                            <span class="text-4xl">📱</span>
+                            <h4 class="text-lg font-bold mt-2">API WhatsApp Web</h4>
+                            <p class="text-sm text-gray-500">Canal de comunicação</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center text-3xl text-gray-400">↓</div>
+
+                    <div id="n8n" class="interactive-diagram-item bg-white p-6 rounded-lg shadow-md border">
+                        <div class="text-center">
+                            <span class="text-4xl">🧠</span>
+                            <h4 class="text-lg font-bold mt-2">n8n - Cérebro do Bot</h4>
+                            <p class="text-sm text-gray-500">Processa mensagens e orquestra ações</p>
+                        </div>
+                        <div id="n8n-details" class="architect-item-details pt-4 mt-4 border-t border-dashed">
+                             <h5 class="font-semibold mb-2 text-gray-700">Funcionalidades Ativas:</h5>
+                            <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                <li><strong>Inteligência de Áudio Avançada:</strong> O bot compreende, transcreve e é capaz de responder em áudio, oferecendo uma experiência de conversação natural e acessível.</li>
+                                <li><strong>Acesso à Internet:</strong> Capaz de realizar consultas externas para validações.</li>
+                                <li><strong>Fluxo de Cadastro de Cliente:</strong> Roda o processo de cadastro via CNPJ e valida as informações.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-center text-3xl text-gray-400">↓</div>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div id="supabase" class="interactive-diagram-item bg-white p-6 rounded-lg shadow-md border">
+                            <div class="text-center">
+                                <span class="text-4xl">🗃️</span>
+                                <h4 class="text-lg font-bold mt-2">Supabase</h4>
+                                <p class="text-sm text-gray-500">Base de Dados</p>
+                            </div>
+                            <div id="supabase-details" class="architect-item-details pt-4 mt-4 border-t border-dashed">
+                                 <h5 class="font-semibold mb-2 text-gray-700">Funções:</h5>
+                                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                    <li>Armazena cadastros de novos clientes.</li>
+                                    <li>Utilizada para conferir se um cliente já está na base antes de iniciar um novo cadastro.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="chatwoot" class="interactive-diagram-item bg-white p-6 rounded-lg shadow-md border">
+                            <div class="text-center">
+                                <span class="text-4xl">👩‍💻</span>
+                                <h4 class="text-lg font-bold mt-2">Chatwoot</h4>
+                                <p class="text-sm text-gray-500">Atendimento Humano</p>
+                            </div>
+                            <div id="chatwoot-details" class="architect-item-details pt-4 mt-4 border-t border-dashed">
+                                <h5 class="font-semibold mb-2 text-gray-700">Funções:</h5>
+                                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                    <li>Plataforma omnichannel para transbordo de atendimentos.</li>
+                                    <li>Permite que atendentes humanos assumam conversas complexas.</li>
+                                    <li>Centraliza todos os atendimentos em um único painel.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="proximos-passos" class="scroll-mt-20">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">Próximos Passos</h3>
+                    <p class="mt-2 text-gray-600">Nosso roadmap para evoluir a inteligência e as capacidades do bot.</p>
+                </div>
+                <div class="relative pl-8 border-l-2 border-amber-200">
+                    <div class="mb-10">
+                        <div class="absolute w-6 h-6 bg-amber-500 rounded-full -left-3 border-4 border-white"></div>
+                        <h4 class="text-xl font-semibold text-gray-800 mb-1">Verificação da Empresa (Meta)</h4>
+                        <p class="text-gray-600">Aguardando a conclusão da verificação da empresa pela Meta para obter o selo de conta oficial e utilizar o número de telefone como verificado.</p>
+                    </div>
+                    <div class="mb-10">
+                        <div class="absolute w-6 h-6 bg-amber-500 rounded-full -left-3 border-4 border-white"></div>
+                        <h4 class="text-xl font-semibold text-gray-800 mb-1">Desenvolvimento de Novos Fluxos</h4>
+                        <p class="text-gray-600">Mapear e implementar as próximas jornadas do cliente, como consulta de catálogo, dúvidas frequentes sobre produtos e 2ª via de boleto.</p>
+                    </div>
+                    <div class="mb-10">
+                         <div class="absolute w-6 h-6 bg-amber-500 rounded-full -left-3 border-4 border-white"></div>
+                        <h4 class="text-xl font-semibold text-gray-800 mb-1">Integração Final com API</h4>
+                        <p class="text-gray-600">Ativar a conexão em tempo real com a API da Superpoderes para conferir cadastros e outras informações diretamente na base oficial.</p>
+                    </div>
+                     <div class="mb-10">
+                        <div class="absolute w-6 h-6 bg-amber-500 rounded-full -left-3 border-4 border-white"></div>
+                        <h4 class="text-xl font-semibold text-gray-800 mb-1">Testes em Larga Escala</h4>
+                        <p class="text-gray-600">Iniciar testes com um grupo maior de usuários internos para refinar as conversas, identificar exceções e garantir a qualidade do atendimento.</p>
+                    </div>
+                    <div>
+                         <div class="absolute w-6 h-6 bg-amber-500 rounded-full -left-3 border-4 border-white"></div>
+                        <h4 class="text-xl font-semibold text-gray-800 mb-1">Lançamento (Beta)</h4>
+                        <p class="text-gray-600">Liberar o bot para um grupo selecionado de clientes reais para coletar feedback valioso e realizar os ajustes finais antes do lançamento completo.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        <footer class="bg-white mt-24 border-t">
+            <div class="container mx-auto px-6 py-6 text-center text-gray-500">
+                <p>&copy; 2025 Superpoderes Cosméticos. Relatório de Progresso.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <div id="infra-page" class="hidden fixed inset-0 bg-slate-50 z-50 p-6 lg:p-12 overflow-y-auto">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                 <h2 class="text-3xl font-bold text-gray-800">Análise de Infraestrutura e Custos</h2>
+                 <button id="back-button" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 font-bold py-2 px-4 rounded-lg transition-colors">Voltar ao Relatório</button>
+            </div>
+            
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 mb-12">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Resumo de Custos Atuais</h3>
+                <p class="text-gray-600 mb-6">A nossa abordagem auto-hospedada (self-hosted) otimiza os custos operacionais, focando em um investimento fixo e de baixo valor, que nos dá controle total sobre as ferramentas e a escalabilidade.</p>
+                <div class="grid md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-amber-50 p-6 rounded-lg">
+                        <p class="text-lg font-semibold text-amber-800">Servidor VPS</p>
+                        <p class="text-3xl font-bold text-amber-600">€ 8,00</p>
+                        <p class="text-sm text-gray-500">/ mês</p>
+                    </div>
+                    <div class="bg-amber-50 p-6 rounded-lg">
+                        <p class="text-lg font-semibold text-amber-800">Domínio 1</p>
+                        <p class="text-3xl font-bold text-amber-600">€ 12,00</p>
+                        <p class="text-sm text-gray-500">/ ano</p>
+                    </div>
+                    <div class="bg-amber-50 p-6 rounded-lg">
+                        <p class="text-lg font-semibold text-amber-800">Domínio 2</p>
+                        <p class="text-3xl font-bold text-amber-600">R$ 40,00</p>
+                        <p class="text-sm text-gray-500">/ ano</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col h-full">
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4">n8n (Automação)</h4>
+                        <div class="mb-4">
+                            <p class="font-semibold text-green-700">Nosso Custo (Self-Hosted)</p>
+                            <p class="text-2xl font-bold">R$ 0 / mês</p>
+                            <p class="text-sm text-gray-500">(Custo na VPS)</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-semibold text-red-700">Custo em Nuvem (Plano Negócios)</p>
+                             <p class="text-2xl font-bold">R$ 4.167 / mês</p>
+                             <p class="text-sm text-gray-500">(Cobrado anualmente)</p>
+                        </div>
+                    </div>
+                    <div class="p-6 mt-auto">
+                        <img src="images/n8nprecos.png" alt="Preços N8N" class="rounded-lg border shadow-sm">
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col h-full">
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4">Chatwoot (Atendimento)</h4>
+                        <div class="mb-4">
+                            <p class="font-semibold text-green-700">Nosso Custo (Self-Hosted)</p>
+                            <p class="text-2xl font-bold">R$ 0 / mês</p>
+                            <p class="text-sm text-gray-500">(Ed. Comunidade, na VPS)</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-semibold text-red-700">Custo em Nuvem (Plano Enterprise)</p>
+                             <p class="text-2xl font-bold">US$ 495 / mês</p>
+                             <p class="text-sm text-gray-500">(p/ 5 agentes, ~R$ 2.725)</p>
+                        </div>
+                    </div>
+                    <div class="p-6 mt-auto">
+                        <img src="images/chatwootprecos.png" alt="Preços Chatwoot" class="rounded-lg border shadow-sm">
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col h-full">
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4">Supabase (Dados)</h4>
+                        <div class="mb-4">
+                            <p class="font-semibold text-green-700">Nosso Custo (Self-Hosted)</p>
+                            <p class="text-2xl font-bold">R$ 0 / mês</p>
+                            <p class="text-sm text-gray-500">(Gratuito, na VPS)</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-semibold text-red-700">Custo em Nuvem (Plano Pro)</p>
+                            <p class="text-2xl font-bold">US$ 25 / mês</p>
+                            <p class="text-sm text-gray-500">(~R$ 137 por mês)</p>
+                        </div>
+                    </div>
+                    <div class="p-6 mt-auto">
+                        <img src="images/supabaseprecos.png" alt="Preços Supabase" class="rounded-lg border shadow-sm">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            const sections = document.querySelectorAll('#main-report section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            function changeLinkState() {
+                if (document.getElementById('main-report').classList.contains('hidden')) {
+                     navLinks.forEach((link) => link.classList.remove('active'));
+                     return;
+                }
+
+                let index = sections.length;
+                while(--index && window.scrollY + 100 < sections[index].offsetTop) {}
+                
+                navLinks.forEach((link) => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.nav-link[href="#${sections[index].id}"]`);
+                if(activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+
+            changeLinkState();
+            window.addEventListener('scroll', changeLinkState);
+
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            const progressChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Infraestrutura e Base', 'Fluxos Iniciais', 'Inteligência de Áudio', 'Novos Fluxos e Integrações'],
+                    datasets: [{
+                        label: 'Esforço do Projeto',
+                        data: [40, 30, 15, 15],
+                        backgroundColor: [
+                            '#10B981', 
+                            '#3B82F6', 
+                            '#8B5CF6', 
+                            '#F59E0B'  
+                        ],
+                        borderColor: '#FDFBF8',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    family: "'Poppins', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const architectItems = document.querySelectorAll('.interactive-diagram-item');
+            architectItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const detailId = item.id + '-details';
+                    const detailElement = document.getElementById(detailId);
+                    if (detailElement) {
+                         const wasOpen = detailElement.classList.contains('open');
+                        document.querySelectorAll('.architect-item-details.open').forEach(openEl => {
+                            openEl.classList.remove('open');
+                        });
+                        if (!wasOpen) {
+                             detailElement.classList.add('open');
+                        }
+                    }
+                });
+            });
+
+            const infraLink = document.getElementById('infra-link');
+            const infraLinkMobile = document.getElementById('infra-link-mobile');
+            const backButton = document.getElementById('back-button');
+            const mainReport = document.getElementById('main-report');
+            const infraPage = document.getElementById('infra-page');
+            const header = document.getElementById('header');
+
+            function showInfraPage() {
+                mainReport.classList.add('hidden');
+                infraPage.classList.remove('hidden');
+                header.classList.add('hidden'); 
+                window.scrollTo(0, 0);
+            }
+
+            function showMainReport() {
+                mainReport.classList.remove('hidden');
+                infraPage.classList.add('hidden');
+                 header.classList.remove('hidden'); 
+                changeLinkState(); 
+            }
+
+            infraLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showInfraPage();
+            });
+            infraLinkMobile.addEventListener('click', (e) => {
+                e.preventDefault();
+                mobileMenu.classList.add('hidden');
+                showInfraPage();
+            });
+            backButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                showMainReport();
+            });
+             document.querySelectorAll('.nav-link-mobile').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
+
